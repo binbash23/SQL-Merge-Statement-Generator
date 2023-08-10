@@ -4,7 +4,7 @@
 */
 
 /* MAN MUSS NUR DIESE BEIDEN VARIABLEN SETZEN (und "result to text" im ssms anklicken)!!! */
-declare @target_table_schema as varchar(255) = 'database_schema_name'
+declare @target_table_schema as varchar(255) = 'table_schema'
 declare @target_table_name   as varchar(255) = 'table_name'
 /* MAN MUSS NUR DIESE BEIDEN VARIABLEN SETZEN!!! */
 
@@ -16,7 +16,7 @@ from
 
 (
 
-select 'Diese Punkte bitte manuell korrigieren (1) bis (4)' as c, 1 as nr
+select 'Bitte manuell das SQL für die Quelltabelle hier einfügen unter (1)' as c, 1 as nr
 union
 select ' ' as c, 2 as nr
 union
@@ -24,33 +24,58 @@ union
 select CONCAT('MERGE ', @target_table_schema, '.', @target_table_name,' as TARGET ', 
 CHAR(13), 'USING ', 
 CHAR(13), '(', 
-CHAR(13), '/* (1) Hier muss das select stmt hin */', 
+CHAR(13), '/* (1) Hier muss das select stmt der quelle hin */', 
 CHAR(13), ')', CHAR(13), 'AS SOURCE ON ', 
-CHAR(13), '( ', 
-CHAR(13), '/* (2) Spalten einsetzen: TARGET.<PK_SPALTE> = SOURCE.<PK_SPALTE> */', 
-CHAR(13), ') ', 
+CHAR(13), '( ') as c,
+10 as nr
+
+union
+
+select
+CONCAT('TARGET.', CU.COLUMN_NAME , ' = SOURCE.', CU.COLUMN_NAME) as c,
+12 as nr
+from
+INFORMATION_SCHEMA.TABLE_CONSTRAINTS C
+left join INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE CU
+on C.CONSTRAINT_NAME = CU.CONSTRAINT_NAME
+where
+C.TABLE_SCHEMA = @target_table_schema
+and
+C.TABLE_NAME = @target_table_name
+
+union
+
+select
+CONCAT(
+') ', 
 CHAR(13), 'WHEN MATCHED AND ', 
-CHAR(13), '(', 
-CHAR(13), '/* (3) Das erste "OR" muss weg */'
-) as c, 10 as nr
+CHAR(13), '('
+) as c, 15 as nr
 
 union
 
 /* 1. iteration (vergleichen) */
 
 select
+case when rownum > 1 then CONCAT('OR ', c) else c end as c,
+nr
+from(
+select
 CONCAT(
- ' OR TARGET.', '[', TARGET_TABLE_COLUMNS.COLUMN_NAME, ']' , ' <> SOURCE.', '[', TARGET_TABLE_COLUMNS.COLUMN_NAME, ']' 
+ ' TARGET.', '[', TARGET_TABLE_COLUMNS.COLUMN_NAME, ']' , ' <> SOURCE.', '[', TARGET_TABLE_COLUMNS.COLUMN_NAME, ']' 
 ,CHAR(13), '    OR (TARGET.', '[', TARGET_TABLE_COLUMNS.COLUMN_NAME, ']' , ' IS NULL AND SOURCE.', '[', TARGET_TABLE_COLUMNS.COLUMN_NAME, ']' 
 ,' IS NOT NULL)', 
 CHAR(13), '    OR (TARGET.', '[', TARGET_TABLE_COLUMNS.COLUMN_NAME, ']' , ' IS NOT NULL AND SOURCE.', '[', TARGET_TABLE_COLUMNS.COLUMN_NAME, ']' , ' IS NULL)'
 ) as c,
-20 as nr
+20 as nr,
+TARGET_TABLE_COLUMNS.ORDINAL_POSITION,
+ROW_NUMBER() over (order by TARGET_TABLE_COLUMNS.ORDINAL_POSITION ) as rownum
 from
 (
 SELECT 
 C.COLUMN_NAME,
-C.DATA_TYPE
+C.DATA_TYPE,
+C.ORDINAL_POSITION
 FROM 
 INFORMATION_SCHEMA.TABLES as T 
 inner join INFORMATION_SCHEMA.COLUMNS as C
@@ -63,13 +88,12 @@ T.TABLE_SCHEMA = @target_table_schema
 and
 C.COLUMN_NAME not in ('Create_Date', 'Last_Update_Date')
 ) as TARGET_TABLE_COLUMNS
-
+) as X
 
 union
 
 select CONCAT( ') ', 
 CHAR(13), 'THEN UPDATE SET ', 
-CHAR(13), '/* (4) ACHTUNG hier muss die PK_SPALTE noch entfernt werden */', 
 CHAR(13), '  Last_Update_Date = getdate() ') as c, 30 as nr
 
 union
@@ -99,6 +123,20 @@ and
 T.TABLE_SCHEMA = @target_table_schema
 and
 C.COLUMN_NAME not in ('Create_Date', 'Last_Update_Date')
+and
+C.COLUMN_NAME not in 
+(
+select
+CU.COLUMN_NAME
+from
+INFORMATION_SCHEMA.TABLE_CONSTRAINTS C
+left join INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE CU
+on C.CONSTRAINT_NAME = CU.CONSTRAINT_NAME
+where
+C.TABLE_SCHEMA = @target_table_schema
+and
+C.TABLE_NAME = @target_table_name
+)
 ) as TARGET_TABLE_COLUMNS
 
 
