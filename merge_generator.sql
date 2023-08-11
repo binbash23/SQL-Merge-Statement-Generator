@@ -4,8 +4,8 @@
 */
 
 /* MAN MUSS NUR DIESE BEIDEN VARIABLEN SETZEN (und "result to text" im ssms anklicken)!!! */
-declare @target_table_schema as varchar(255) = 'table_schema'
-declare @target_table_name   as varchar(255) = 'table_name'
+declare @target_table_schema as varchar(255) = 'schema'
+declare @target_table_name   as varchar(255) = 'table'
 /* MAN MUSS NUR DIESE BEIDEN VARIABLEN SETZEN!!! */
 
 
@@ -24,10 +24,44 @@ union
 select CONCAT('MERGE ', @target_table_schema, '.', @target_table_name,' as TARGET ', 
 CHAR(13), 'USING ', 
 CHAR(13), '(', 
-CHAR(13), '/* (1) Hier muss das select stmt der quelle hin */', 
-CHAR(13), ')', CHAR(13), 'AS SOURCE ON ', 
+CHAR(13), ' <(1) Hier das SQL für die Quelle der Daten angeben>',
+CHAR(13), 'select') as c,
+5 as nr
+
+union
+
+select
+CONCAT(
+ ' S.', '[', TARGET_TABLE_COLUMNS.COLUMN_NAME, ']' , ' as ', '[', TARGET_TABLE_COLUMNS.COLUMN_NAME, ']' 
+) as c,
+8 as nr
+from
+(
+SELECT 
+C.COLUMN_NAME,
+C.DATA_TYPE
+FROM 
+INFORMATION_SCHEMA.TABLES as T 
+inner join INFORMATION_SCHEMA.COLUMNS as C
+on T.TABLE_SCHEMA = C.TABLE_SCHEMA and T.TABLE_NAME = C.TABLE_NAME
+WHERE T.TABLE_TYPE = 'BASE TABLE' 
+and
+T.TABLE_NAME = @target_table_name
+and
+T.TABLE_SCHEMA = @target_table_schema
+and
+C.COLUMN_NAME not in ('Create_Date', 'Last_Update_Date')
+) as TARGET_TABLE_COLUMNS
+
+union
+
+select CONCAT('from', CHAR(13)
+, ' <BASETABLE(s)_NAME or JOINS> as S', CHAR(13)
+, ')', 
+CHAR(13), 'AS SOURCE ON ', 
 CHAR(13), '( ') as c,
 10 as nr
+
 
 union
 
