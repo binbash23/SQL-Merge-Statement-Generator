@@ -39,7 +39,7 @@ union
 
 select
 CONCAT(
- ' S.', '[', TARGET_TABLE_COLUMNS.COLUMN_NAME, ']' , ' as ', '[', TARGET_TABLE_COLUMNS.COLUMN_NAME, ']' 
+ ' ,S.', '[', TARGET_TABLE_COLUMNS.COLUMN_NAME, ']' , ' as ', '[', TARGET_TABLE_COLUMNS.COLUMN_NAME, ']' 
 ) as c,
 8 as nr
 from
