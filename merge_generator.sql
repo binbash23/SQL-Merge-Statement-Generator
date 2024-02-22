@@ -1,4 +1,3 @@
-
 /*
 20230809 jens heine, nils loewemann, yetis batmaz
 */
@@ -58,7 +57,7 @@ T.TABLE_NAME = @target_table_name
 and
 T.TABLE_SCHEMA = @target_table_schema
 and
-C.COLUMN_NAME not in ('Create_Date', 'Last_Update_Date')
+C.COLUMN_NAME not in ('create_date', 'last_update_date')
 ) as TARGET_TABLE_COLUMNS
 
 union
@@ -126,7 +125,7 @@ T.TABLE_NAME = @target_table_name
 and
 T.TABLE_SCHEMA = @target_table_schema
 and
-C.COLUMN_NAME not in ('Create_Date', 'Last_Update_Date')
+C.COLUMN_NAME not in ('create_date', 'last_update_date')
 ) as TARGET_TABLE_COLUMNS
 ) as X
 
@@ -134,7 +133,7 @@ union
 
 select CONCAT( ') ', 
 CHAR(13), 'THEN UPDATE SET ', 
-CHAR(13), '  Last_Update_Date = getdate() ') as c, 30 as nr
+CHAR(13), '  last_update_date = getdate() ') as c, 30 as nr
 
 union
 
@@ -160,7 +159,7 @@ T.TABLE_NAME = @target_table_name
 and
 T.TABLE_SCHEMA = @target_table_schema
 and
-C.COLUMN_NAME not in ('Create_Date', 'Last_Update_Date')
+C.COLUMN_NAME not in ('create_date', 'last_update_date')
 and
 C.COLUMN_NAME not in 
 (
@@ -183,8 +182,8 @@ select
 CONCAT(
 'WHEN NOT MATCHED THEN INSERT ', 
 CHAR(13), '(', 
-CHAR(13), '  Create_Date ', 
-CHAR(13), ' ,Last_Update_Date ') as c,
+CHAR(13), '  create_date ', 
+CHAR(13), ' ,last_update_date ') as c,
 50 as nr
 
 union
@@ -211,7 +210,7 @@ T.TABLE_NAME = @target_table_name
 and
 T.TABLE_SCHEMA = @target_table_schema
 and
-C.COLUMN_NAME not in ('Create_Date', 'Last_Update_Date')
+C.COLUMN_NAME not in ('create_date', 'last_update_date')
 ) as TARGET_TABLE_COLUMNS
 
 union
@@ -246,7 +245,7 @@ T.TABLE_NAME = @target_table_name
 and
 T.TABLE_SCHEMA = @target_table_schema
 and
-C.COLUMN_NAME not in ('Create_Date', 'Last_Update_Date')
+C.COLUMN_NAME not in ('create_date', 'last_update_date')
 ) as TARGET_TABLE_COLUMNS
 
 union
