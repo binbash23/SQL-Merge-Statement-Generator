@@ -67,7 +67,7 @@ C.COLUMN_NAME not in ('create_date', 'last_update_date')
 union
 
 select CONCAT('from', 
-CHAR(13), ' <BASETABLE(s)_NAME or JOINS> as S', 
+CHAR(13), ' <BASETABLE(s)_NAME or JOINS> as SOURCE', 
 CHAR(13), ')', 
 CHAR(13), 'AS SOURCE ON ', 
 CHAR(13), '( ') as c,
