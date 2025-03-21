@@ -3,13 +3,17 @@
 */
 
 /* 
-Man muss nur 2 Variablen setzen (und "result to text" im ssms anklicken)!!! 
-Dann das Ergebniss dieses ganzen SQL Statements noch ein wenig anpassen (sieht Punkt (1)
+Set the two variables below in the top of the code.
+Then optimize/extend the generated code for your needs (see Point (1))
 im Output des SQL's.
+NOTE:
+Make sure that you have set in ssms:
+1.) tools->options->query results->sql server->default destination for results->results to text
+2.) tools->options->query results->sql server->results to text->max number of results displayed in each column->2048 (or more as needed)
 */
 
 
-/* MAN MUSS NUR DIESE BEIDEN VARIABLEN SETZEN!!! */
+/* ONLY SET THESE VARIABLES!!! */
 declare @target_table_schema as varchar(255) = 'schema_name'
 declare @target_table_name   as varchar(255) = 'table_name'
 
@@ -22,7 +26,7 @@ from
 
 (
 
-select 'Bitte manuell das SQL für die Quelltabelle hier einfügen unter (1)' as c, 1 as nr
+select 'Enter the sql statement for querying the source table/view at point (1)' as c, 1 as nr
 union
 select ' ' as c, 2 as nr
 
@@ -31,7 +35,7 @@ union
 select CONCAT('MERGE ', @target_table_schema, '.', @target_table_name,' as TARGET ', 
 CHAR(13), 'USING ', 
 CHAR(13), '(', 
-CHAR(13), ' <(1) Hier das SQL für die Quelle der Daten angeben>',
+CHAR(13), ' <(1) Enter here the sql query statement for the source table/view>',
 CHAR(13), 'select') as c,
 5 as nr
 
@@ -94,7 +98,7 @@ CHAR(13), '('
 
 union
 
-/* 1. iteration (vergleichen) */
+/* 1. iteration (verify both sides) */
 
 select
 case when rownum > 1 then CONCAT('OR ', c) else c end as c,
