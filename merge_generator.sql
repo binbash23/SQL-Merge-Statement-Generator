@@ -254,7 +254,15 @@ C.COLUMN_NAME not in ('create_date', 'last_update_date')
 
 union
 
-select  '); ' as c, 90 as nr
+select  ') ' as c, 90 as nr
+
+union
+
+select  '/* enable this when needed: WHEN NOT MATCHED BY SOURCE THEN DELETE */ ' as c, 95 as nr
+
+union
+
+select  '; ' as c, 100 as nr
 
 ) x
 order by nr
