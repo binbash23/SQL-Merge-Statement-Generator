@@ -1,5 +1,6 @@
 /*
 20230809 jens heine <binbash@gmx.net>, nils loewemann, yetis batmaz
+20260129 jens heine, nils loewemann: match on table with multiple columns as a pk fixed, also [] around cols
 */
 
 /* 
@@ -14,8 +15,8 @@ When you use ssms, make sure that you have set these options:
 
 
 /* ONLY SET THESE VARIABLES!!! */
-declare @target_table_schema as varchar(255) = 'schema_name'
-declare @target_table_name   as varchar(255) = 'table_name'
+declare @target_table_schema as varchar(255) = 'Reporting_ETL'
+declare @target_table_name   as varchar(255) = 'nav_10_kalkulation_posten_csi'
 
 
 
@@ -76,16 +77,22 @@ CHAR(13), '( /* < merge search condition, usually primary key comparison > */') 
 union
 
 select
-CONCAT('TARGET.', CU.COLUMN_NAME , ' = SOURCE.', CU.COLUMN_NAME) as c,
-12 as nr
+	string_agg(s1.c, ' AND '),
+	12 as nr
 from
-INFORMATION_SCHEMA.TABLE_CONSTRAINTS C
-left join INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE CU
-on C.CONSTRAINT_NAME = CU.CONSTRAINT_NAME
-where
-C.TABLE_SCHEMA = @target_table_schema
-and
-C.TABLE_NAME = @target_table_name
+	(
+	select
+		CONCAT('TARGET.[', CU.COLUMN_NAME , '] = SOURCE.[', CU.COLUMN_NAME, ']') as c
+	from
+		INFORMATION_SCHEMA.TABLE_CONSTRAINTS C
+	left join 
+		INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE CU on 
+			C.CONSTRAINT_NAME = CU.CONSTRAINT_NAME
+	where
+		C.TABLE_SCHEMA = @target_table_schema
+		and
+		C.TABLE_NAME = @target_table_name
+	) s1
 
 union
 
