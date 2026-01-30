@@ -15,8 +15,8 @@ When you use ssms, make sure that you have set these options:
 
 
 /* ONLY SET THESE VARIABLES!!! BEGIN */
-declare @target_table_schema as varchar(255) = 'Reporting_ETL'
-declare @target_table_name   as varchar(255) = 'nav_10_kalkulation_posten_csi'
+declare @target_table_schema as varchar(255) = '<TARGET_SCHEMA_NAME>'
+declare @target_table_name   as varchar(255) = '<TARGET_TABLE_NAME>'
 /* ONLY SET THESE VARIABLES!!! END */
 
 
@@ -273,4 +273,5 @@ select  '; ' as c, 100 as nr
 
 ) x
 order by nr
+
 
